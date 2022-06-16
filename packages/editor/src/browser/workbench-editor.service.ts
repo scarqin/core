@@ -1572,10 +1572,6 @@ export class EditorGroup extends WithEventBus implements IGridEditorGroup {
         return; // other type not handled
       }
 
-      if (_resource !== this.currentResource) {
-        throw new EditorTabChangedError(); // 在打开过程中已经改变了
-      }
-
       this._currentOpenType = activeOpenType;
       this.notifyBodyChanged();
 
