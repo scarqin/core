@@ -231,6 +231,10 @@ export class WorkbenchEditorServiceImpl extends WithEventBus implements Workbenc
     return false;
   }
 
+  calcDirtyCount(): number {
+    return this.editorGroups.reduce((pre, cur) => pre + cur.calcDirtyCount(), 0);
+  }
+
   createEditorGroup(): EditorGroup {
     const editorGroup = this.injector.get(EditorGroup, [this.generateRandomEditorGroupName()]);
     this.editorGroups.push(editorGroup);
@@ -1352,10 +1356,8 @@ export class EditorGroup extends WithEventBus implements IGridEditorGroup {
             });
           }
         }
-        this._currentResource = resource;
-        this.notifyTabChanged();
         this._currentOpenType = null;
-        this.notifyBodyChanged();
+        this._currentResource = resource;
 
         // 只有真正打开的文件才会走到这里，backend模式的只更新了tab，文件内容并未加载
         const reportTimer = this.reporterService.time(REPORT_NAME.EDITOR_REACTIVE);
@@ -1366,10 +1368,13 @@ export class EditorGroup extends WithEventBus implements IGridEditorGroup {
           this.notifyTabLoading(resource!);
         }, 60);
         await this.displayResourceComponent(resource, options);
+        this._currentOrPreviousFocusedEditor = this.currentEditor;
+        this.notifyTabChanged();
+        this.notifyBodyChanged();
+
         clearTimeout(delayTimer);
         resourceReady.resolve();
         reportTimer.timeEnd(resource.uri.toString());
-        this._currentOrPreviousFocusedEditor = this.currentEditor;
         this._onDidEditorFocusChange.fire();
         this.setContextKeys();
         this.eventBus.fire(
@@ -2075,6 +2080,24 @@ export class EditorGroup extends WithEventBus implements IGridEditorGroup {
       }
     }
     return false;
+  }
+
+  /**
+   * 计算 dirty 数量
+   */
+  calcDirtyCount(): number {
+    let count = 0;
+    for (const r of this.resources) {
+      const docRef = this.documentModelManager.getModelReference(r.uri);
+      if (docRef) {
+        const isDirty = docRef.instance.dirty;
+        docRef.dispose();
+        if (isDirty) {
+          count += 1;
+        }
+      }
+    }
+    return count;
   }
 
   componentUndo() {
