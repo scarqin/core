@@ -3080,15 +3080,17 @@ export enum InlayHintKind {
 @es5ClassCompat
 export class InlayHint {
   text: string;
+
   label: string | InlayHintLabelPart[];
+
   position: Position;
+
   kind?: vscode.InlayHintKind;
-  whitespaceBefore?: boolean;
-  whitespaceAfter?: boolean;
+
   paddingLeft?: boolean;
   paddingRight?: boolean;
 
-  constructor(label: string | InlayHintLabelPart[], position: Position, kind?: vscode.InlayHintKind) {
+  constructor(position: Position, label: string | InlayHintLabelPart[], kind?: vscode.InlayHintKind) {
     // InlayHint 新版本的 text 属性更新为 label
     // 为兼容老版本插件，保留 string 类型的 text 属性
     // monaco 升级过渡期后可安全移除
