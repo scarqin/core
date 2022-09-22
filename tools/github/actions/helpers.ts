@@ -1,4 +1,9 @@
-const createVersionText = (type = 'Pre-Release', version, context) => {
+import { Context } from './core';
+
+export const createVersionText = (type = 'Pre-Release', version: string, context: Context) => {
+  if (!context.payload.comment) {
+    return '';
+  }
   return (
     `🎉 ${type} version ` +
     version +
@@ -16,8 +21,4 @@ const createVersionText = (type = 'Pre-Release', version, context) => {
     '\n' +
     '```\n'
   );
-};
-
-module.exports = {
-  createVersionText,
 };
