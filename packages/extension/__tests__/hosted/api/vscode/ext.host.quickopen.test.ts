@@ -11,6 +11,7 @@ import { createBrowserInjector } from '../../../../../../tools/dev-tool/src/inje
 import { mockService } from '../../../../../../tools/dev-tool/src/mock-injector';
 import { MainThreadQuickOpen } from '../../../../src/browser/vscode/api/main.thread.quickopen';
 import { MainThreadAPIIdentifier, ExtHostAPIIdentifier } from '../../../../src/common/vscode';
+import { QuickPickItemKind } from '../../../../src/common/vscode/ext-types';
 import { ExtHostQuickOpen } from '../../../../src/hosted/api/vscode/ext.host.quickopen';
 
 const emitterA = new Emitter<any>();
@@ -84,6 +85,32 @@ describe('ext host quickopen test', () => {
   it('get quickpick item', async () => {
     const item = await extHost.showQuickPick(['a', 'b']);
     expect(item).toBe('a');
+  });
+
+  it('get quickpick separator item ', async () => {
+    const $showQuickPick = jest.spyOn(mainThread, '$showQuickPick');
+    await extHost.showQuickPick([
+      {
+        label: 'aaa',
+        kind: QuickPickItemKind.Separator,
+      },
+      {
+        label: 'bbb',
+      },
+    ]);
+    expect($showQuickPick).toBeCalledWith(
+      expect.anything(),
+      [
+        {
+          // use separator item label
+          groupLabel: 'aaa',
+          label: 'bbb',
+          showBorder: true,
+          value: 1,
+        },
+      ],
+      undefined,
+    );
   });
 
   it('get quickpick item with canPickMany', async () => {
