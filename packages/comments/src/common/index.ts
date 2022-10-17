@@ -1,5 +1,5 @@
-import { RecycleTreeProps, TreeNode } from '@opensumi/ide-core-browser/lib/components';
-import { IContextKeyService } from '@opensumi/ide-core-browser/lib/context-key';
+import type { RecycleTreeProps, TreeNode } from '@opensumi/ide-core-browser/lib/components';
+import type { IContextKeyService } from '@opensumi/ide-core-browser/lib/context-key';
 import {
   BasicEvent,
   IDisposable,
