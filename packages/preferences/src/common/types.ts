@@ -1,10 +1,5 @@
-import {
-  ISettingGroup,
-  ISettingSection,
-  IDisposable,
-  IPreferenceViewDesc,
-  PreferenceScope,
-} from '@opensumi/ide-core-browser';
+import { IPreferenceViewDesc, ISettingGroup, ISettingSection } from '@opensumi/ide-core-browser/lib/preferences';
+import { IDisposable, PreferenceScope } from '@opensumi/ide-core-common';
 
 export const SettingContribution = Symbol('SettingContribution');
 
