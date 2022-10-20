@@ -27,7 +27,7 @@ if (!process.env.GITHUB_TOKEN) {
     if (!changelog) {
       continue;
     }
-    draftLog.push(`- [x] ${changelog} [#${item.number}](${item.html_url}). [@${item.user.login}](${item.user.url})`);
+    draftLog.push(`- [x] ${changelog} by @${item.user.login} in ${item.html_url}`);
   }
 
   const plan = `<!-- This plan captures our work in February. This is a 3-week iteration. We will ship in mid-April. -->
