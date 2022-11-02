@@ -17,15 +17,16 @@ import {
   MessageType,
   memoize,
 } from '@opensumi/ide-core-common';
-import { WorkbenchEditorService, TrackedRangeStickiness } from '@opensumi/ide-editor';
 import {
   IEditorDocumentModelService,
   IEditorDocumentModelContentRegistry,
   IEditorDocumentModelContentProvider,
   IEditorDocumentModelRef,
+  WorkbenchEditorService,
 } from '@opensumi/ide-editor/lib/browser';
 import { IFileServiceClient } from '@opensumi/ide-file-service/lib/common';
-import { ITextModel } from '@opensumi/ide-monaco/lib/browser/monaco-api/types';
+import type { IModelDeltaDecoration } from '@opensumi/ide-monaco/lib/browser/monaco-api/editor';
+import type { ITextModel } from '@opensumi/ide-monaco/lib/browser/monaco-api/types';
 import { IDialogService } from '@opensumi/ide-overlay';
 import { IWorkspaceService } from '@opensumi/ide-workspace';
 import { IWorkspaceEditService } from '@opensumi/ide-workspace-edit';
@@ -48,7 +49,7 @@ const toReplaceResource = (fileResource: URI): URI =>
 
 @Injectable()
 export class RangeHighlightDecorations implements IDisposable {
-  private _decorationId: string | null = null;
+  private preDeltaDecoration: string[] | null = null;
   private _model: ITextModel | null = null;
   private _modelRef: IEditorDocumentModelRef | null = null;
   private readonly _modelDisposables = new DisposableStore();
@@ -57,13 +58,13 @@ export class RangeHighlightDecorations implements IDisposable {
   documentModelManager: IEditorDocumentModelService;
 
   removeHighlightRange() {
-    if (this._model && this._decorationId) {
-      this._model.deltaDecorations([this._decorationId], []);
+    if (this._model && this.preDeltaDecoration) {
+      this._model.deltaDecorations(this.preDeltaDecoration, []);
     }
-    this._decorationId = null;
+    this.preDeltaDecoration = null;
   }
 
-  highlightRange(resource: URI | ITextModel, range: IRange, ownerId = 0): void {
+  highlightRange(resource: URI | ITextModel, range: IRange): void {
     let model: ITextModel | null = null;
     if (URI.isUri(resource)) {
       const modelRef = this.documentModelManager.getModelReference(resource, 'highlight-range');
@@ -82,11 +83,12 @@ export class RangeHighlightDecorations implements IDisposable {
 
   private doHighlightRange(model: ITextModel, range: IRange) {
     this.removeHighlightRange();
-    this._decorationId = model.deltaDecorations(
-      [],
-      [{ range, options: RangeHighlightDecorations._RANGE_HIGHLIGHT_DECORATION }],
-    )[0];
+    this.preDeltaDecoration = model.deltaDecorations([], this.createEditorDecorations(range));
     this.setModel(model);
+  }
+
+  private createEditorDecorations(range: IRange) {
+    return [{ range, options: RangeHighlightDecorations.RANGE_HIGHLIGHT_DECORATION }] as IModelDeltaDecoration[];
   }
 
   private setModel(model: ITextModel) {
@@ -98,13 +100,6 @@ export class RangeHighlightDecorations implements IDisposable {
       this.clearModelListeners();
       this._model = model;
 
-      this._modelDisposables.add(
-        this._model.onDidChangeDecorations((e) => {
-          this.clearModelListeners();
-          this.removeHighlightRange();
-          this._model = null;
-        }),
-      );
       this._modelDisposables.add(
         this._model.onWillDispose(() => {
           this.clearModelListeners();
@@ -127,11 +122,11 @@ export class RangeHighlightDecorations implements IDisposable {
     }
   }
 
-  private static readonly _RANGE_HIGHLIGHT_DECORATION = {
-    stickiness: TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+  private static readonly RANGE_HIGHLIGHT_DECORATION = {
     className: 'rangeHighlight',
+    stickiness: monaco.editor.TrackedRangeStickiness.GrowsOnlyWhenTypingBefore,
     isWholeLine: true,
-  } as any;
+  };
 }
 
 @Injectable()
@@ -153,7 +148,7 @@ export class ReplaceDocumentModelContentProvider implements IEditorDocumentModel
     return scheme === Schemes.internal;
   }
 
-  provideEditorDocumentModelContent(uri: URI, encoding?: string): string {
+  provideEditorDocumentModelContent(uri: URI): string {
     return this.contentMap.get(uri.toString()) || '';
   }
 
@@ -161,7 +156,7 @@ export class ReplaceDocumentModelContentProvider implements IEditorDocumentModel
     return true;
   }
 
-  async updateContent(uri: URI, encoding?: string): Promise<any> {
+  async updateContent(uri: URI): Promise<any> {
     const sourceFileUri = uri.withScheme(JSON.parse(uri.query).scheme).withoutQuery().withoutFragment();
     const sourceDocModelRef =
       this.documentModelManager.getModelReference(sourceFileUri) ||
