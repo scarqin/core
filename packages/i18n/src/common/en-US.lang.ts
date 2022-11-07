@@ -1003,6 +1003,11 @@ export const localizationBundle = {
     'task.cannotFindTask': 'Cannot find task for {0}. Press Enter key to return.',
 
     // extension contribute
+
+    // #region walkthrough
+    'walkthroughs.welcome': 'Welcome',
+    'walkthroughs.get.started': "Open the 'Getting Started' walkthrough",
+    // #endregion walkthrough
     ...browserViews,
   },
 };
