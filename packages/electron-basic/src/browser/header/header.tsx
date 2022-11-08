@@ -126,6 +126,7 @@ interface ElectronHeaderBarPorps {
   TitleComponent?: React.FunctionComponent<TitleBarProps>;
   Icon?: React.FunctionComponent;
   autoHide?: boolean;
+  height?: number;
 }
 
 /**
@@ -138,6 +139,7 @@ export const ElectronHeaderBar = observer(
     TitleComponent,
     Icon,
     autoHide = true,
+    height = isNewMacHeaderBar() ? LAYOUT_VIEW_SIZE.BIG_SUR_TITLEBAR_HEIGHT : LAYOUT_VIEW_SIZE.TITLEBAR_HEIGHT,
   }: React.PropsWithChildren<ElectronHeaderBarPorps>) => {
     const windowService: IWindowService = useInjectable(IWindowService);
 
@@ -165,9 +167,7 @@ export const ElectronHeaderBar = observer(
     return (
       <div
         className={styles.header}
-        style={{
-          height: isNewMacHeaderBar() ? LAYOUT_VIEW_SIZE.BIG_SUR_TITLEBAR_HEIGHT : LAYOUT_VIEW_SIZE.TITLEBAR_HEIGHT,
-        }}
+        style={{ height }}
         onDoubleClick={async () => {
           if (await getMaximized()) {
             windowService.unmaximize();
