@@ -32,6 +32,7 @@
     "@opensumi/ide-task": "2.21.2",
     "@opensumi/ide-terminal-next": "2.21.2",
     "@opensumi/ide-webview": "2.21.2",
+    "@opensumi/ide-markdown": "2.21.1",
     "@opensumi/vscode-jsonrpc": "^8.0.0-next.2",
     "address": "^1.1.2",
     "glob-to-regexp": "0.4.1",
@@ -61,7 +62,6 @@
     "@opensumi/ide-theme": "2.21.1",
     "@opensumi/ide-toolbar": "2.21.1",
     "@opensumi/ide-workspace": "2.21.1",
-    "@opensumi/ide-workspace-edit": "2.21.1",
-    "@opensumi/ide-markdown": "2.21.1"
+    "@opensumi/ide-workspace-edit": "2.21.1"
   }
 }
