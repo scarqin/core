@@ -28,10 +28,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
       - name: Build & Test
         run: |
-          yarn
+          yarn --prefer-offline
           npm run ci -- -- --selectProjects jsdom
 
       - if: ${{ matrix.node-version == '14.x' && matrix.os == 'ubuntu-latest' }}
@@ -55,10 +56,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
       - name: Build & Test
         run: |
-          yarn
+          yarn --prefer-offline
           npm run ci -- -- --selectProjects node
 
       - if: ${{ matrix.node-version == '14.x' && matrix.os == 'ubuntu-latest' }}

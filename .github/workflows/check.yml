@@ -22,10 +22,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
       - name: Build
         run: |
-          yarn
+          yarn --prefer-offline
           npm run init
           npm run bundle:lite
 
